@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Ayeye11/inv/internal/db/models"
+	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
 )
 
@@ -20,6 +21,10 @@ func NewStorage(db *gorm.DB, jwtKey string) Storage {
 }
 
 type MiddlewareRepository interface {
+	// auth
+	GetClaimsFromCookie(r *http.Request) (jwt.MapClaims, error)
+	GetSingleClaim(claims jwt.MapClaims, key string) (string, error)
+	CheckRole(role, minRole string) error
 }
 
 type UserRepository interface {

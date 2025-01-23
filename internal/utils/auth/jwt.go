@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/Ayeye11/inv/internal/db/models"
@@ -21,4 +22,25 @@ func CreateJWT(user *models.User, secretKey string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func CheckToken(tokenString, secretKey string) (jwt.MapClaims, error) {
+	token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method")
+		}
+
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid token")
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, nil
+	}
+
+	return nil, fmt.Errorf("invalid token")
 }

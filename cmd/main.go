@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/Ayeye11/inv/cmd/migrate"
 	"github.com/Ayeye11/inv/internal/db"
 	"github.com/Ayeye11/inv/internal/store"
 	"github.com/joho/godotenv"
@@ -29,6 +30,9 @@ func main() {
 	}
 
 	// migrations
+	if err := migrate.Migrate(db); err != nil {
+		log.Fatal(err)
+	}
 
 	// storage
 	storage := store.NewStorage(db, cfg.jwtKey)
