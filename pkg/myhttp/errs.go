@@ -6,8 +6,8 @@ import (
 )
 
 type ErrorHTTP struct {
-	status int
-	data   string
+	Status int
+	Data   string
 }
 
 func NewErrorHTTP(status int, data string) *ErrorHTTP {
@@ -15,7 +15,7 @@ func NewErrorHTTP(status int, data string) *ErrorHTTP {
 }
 
 func (e *ErrorHTTP) Error() string {
-	return e.data
+	return e.Data
 }
 
 var serverErrorMessages = map[int]string{
@@ -26,9 +26,18 @@ var serverErrorMessages = map[int]string{
 }
 
 func (e *ErrorHTTP) CheckServerErrors() error {
-	if val, exists := serverErrorMessages[e.status]; exists {
+	if val, exists := serverErrorMessages[e.Status]; exists {
 		return fmt.Errorf("%s", val)
 	}
 
 	return fmt.Errorf("%s", "something went wrong... Please try again later")
+}
+
+func ParseError(err error) *ErrorHTTP {
+	if errHTTP, ok := err.(*ErrorHTTP); ok {
+		return errHTTP
+	}
+
+	msg := fmt.Sprintf("fail to parse error:\n%v\n", err)
+	return NewErrorHTTP(http.StatusInternalServerError, msg)
 }

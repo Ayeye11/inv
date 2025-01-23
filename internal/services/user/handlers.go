@@ -26,8 +26,9 @@ func (h *Handler) postRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = h.store.CreateUser(&models.User{
-		Account:  payload.Account,
 		Email:    payload.Email,
+		Name:     payload.Name,
+		Lastname: payload.Lastname,
 		Password: hash,
 		Role:     "user",
 	})
@@ -40,5 +41,29 @@ func (h *Handler) postRegister(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) postLogin(w http.ResponseWriter, r *http.Request) {
+	payload, err := h.store.ParseLoginPayload(r)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
 
+	if err := h.store.ValidateLoginPayload(payload); err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	user, err := h.store.TryLogin(payload.Email, payload.Password)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	token, err := h.store.CreateToken(user)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	h.store.SendCookie(w, token)
+	myhttp.SendMessage(w, http.StatusOK, "login successful")
 }
