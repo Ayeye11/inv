@@ -58,3 +58,43 @@ func (s *ProductStore) AddProduct(product *models.Product) error {
 
 	return nil
 }
+
+// read
+func (s *ProductStore) GetProductsPage(page int) ([]models.Product, error) {
+	if page < 1 {
+		return nil, myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid query")
+	}
+
+	limit := 10
+	offset := (page - 1) * limit
+
+	query := s.db.Limit(limit).Offset(offset)
+
+	var products []models.Product
+	if err := query.Find(&products).Error; err != nil {
+		return nil, myhttp.NewErrorHTTP(http.StatusInternalServerError, err.Error())
+	}
+
+	if page > 1 && len(products) == 0 {
+		return nil, myhttp.NewErrorHTTP(http.StatusNotFound, "no products found")
+	}
+
+	return products, nil
+}
+
+func (s *ProductStore) GetProductById(id int) (*models.Product, error) {
+	if id < 1 {
+		return nil, myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid id")
+	}
+
+	var product models.Product
+	if err := s.db.First(&product, id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, myhttp.NewErrorHTTP(http.StatusNotFound, "product not found")
+		}
+
+		return nil, myhttp.NewErrorHTTP(http.StatusInternalServerError, err.Error())
+	}
+
+	return &product, nil
+}

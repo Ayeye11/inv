@@ -9,13 +9,16 @@ import (
 type Handler struct {
 	globalStore store.GlobalRepository
 	store       store.ProductRepository
-	middl       *middlewares.Middleware
+	middls      *middlewares.Middleware
 }
 
-func NewHandler(globalStore store.GlobalRepository, store store.ProductRepository, middl *middlewares.Middleware) *Handler {
-	return &Handler{globalStore, store, middl}
+func NewHandler(globalStore store.GlobalRepository, store store.ProductRepository, middls *middlewares.Middleware) *Handler {
+	return &Handler{globalStore, store, middls}
 }
 
 func (h *Handler) SetRoutes(r *chi.Mux) {
-	r.With(h.middl.AuthorizeAdmin).Post("/products", h.postProducts)
+	r.With(h.middls.AuthEmployeeWithClaims).Post("/products", h.postProducts)
+
+	r.With(h.middls.AuthEmployee).Get("/products", h.getProductsPage)
+	r.With(h.middls.AuthEmployee).Get("/products/{id}", h.getProductById)
 }

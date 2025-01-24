@@ -9,22 +9,22 @@ import (
 )
 
 type Router struct {
-	r       *chi.Mux
+	mux     *chi.Mux
 	storage store.Storage
 }
 
-func NewRouter(r *chi.Mux, storage store.Storage) *Router {
-	return &Router{r, storage}
+func NewRouter(mux *chi.Mux, storage store.Storage) *Router {
+	return &Router{mux, storage}
 }
 
-func (mux *Router) Setup() {
-	middls := middlewares.SetMiddlewares(mux.storage.Middleware)
+func (r *Router) Setup() {
+	middls := middlewares.SetMiddlewares(r.storage.Middleware)
 
 	// handlers
-	authHandler := user.NewHandler(mux.storage.Global, mux.storage.User, middls)
-	productHandler := product.NewHandler(mux.storage.Global, mux.storage.Product, middls)
+	authHandler := user.NewHandler(r.storage.Global, r.storage.User, middls)
+	productHandler := product.NewHandler(r.storage.Global, r.storage.Product, middls)
 
 	// routes
-	authHandler.SetupRoutes(mux.r)
-	productHandler.SetRoutes(mux.r)
+	authHandler.SetupRoutes(r.mux)
+	productHandler.SetRoutes(r.mux)
 }

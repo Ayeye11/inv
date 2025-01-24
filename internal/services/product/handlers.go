@@ -46,3 +46,42 @@ func (h *Handler) postProducts(w http.ResponseWriter, r *http.Request) {
 
 	myhttp.SendMessage(w, http.StatusCreated, "product created successfully")
 }
+
+func (h *Handler) getProductsPage(w http.ResponseWriter, r *http.Request) {
+	if !r.URL.Query().Has("page") {
+		http.Redirect(w, r, "/products?page=1", http.StatusFound)
+		return
+	}
+
+	query := r.URL.Query().Get("page")
+
+	page, err := h.globalStore.Atoi(query)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	products, err := h.store.GetProductsPage(page)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	myhttp.SendJSON(w, http.StatusOK, products)
+}
+
+func (h *Handler) getProductById(w http.ResponseWriter, r *http.Request) {
+	id, err := h.globalStore.Atoi(r.PathValue("id"))
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	product, err := h.store.GetProductById(id)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	myhttp.SendJSON(w, http.StatusOK, product)
+}

@@ -69,4 +69,7 @@ type ProductRepository interface {
 	ValidateAddProductPayload(payload *models.AddProductPayload) error
 	// create
 	AddProduct(product *models.Product) error
+	// read
+	GetProductsPage(page int) ([]models.Product, error)
+	GetProductById(id int) (*models.Product, error)
 }
