@@ -70,7 +70,7 @@ func (h *Handler) postLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) postLogout(w http.ResponseWriter, r *http.Request) {
-	username, err := h.globalStore.GetSingleClaimFromContext(r, "username")
+	username, err := h.globalStore.GetSingleClaimFromContext(r, "name")
 	if err != nil {
 		myhttp.SendError(w, err)
 		return

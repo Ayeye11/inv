@@ -20,7 +20,7 @@ var valideRoles = map[string]int{
 	"admin":    3,
 }
 
-// auth
+// authentify
 func (s *MiddlewareStore) GetClaimsFromCookie(r *http.Request) (jwt.MapClaims, error) {
 	cookie, err := r.Cookie("token")
 	if err != nil {
@@ -47,8 +47,9 @@ func (s *MiddlewareStore) GetSingleClaim(claims jwt.MapClaims, key string) (stri
 	return "", myhttp.NewErrorHTTP(http.StatusInternalServerError, "failed to get claim")
 }
 
+// authorize
 func (s *MiddlewareStore) CheckRole(role, minRole string) error {
-	val, exists := valideRoles[minRole]
+	value, exists := valideRoles[minRole]
 	if !exists {
 		return myhttp.NewErrorHTTP(http.StatusInternalServerError, "invalid user role")
 	}
@@ -58,7 +59,7 @@ func (s *MiddlewareStore) CheckRole(role, minRole string) error {
 		return myhttp.NewErrorHTTP(http.StatusInternalServerError, "invalid user role")
 	}
 
-	if val >= userRole {
+	if userRole >= value {
 		return nil
 	}
 

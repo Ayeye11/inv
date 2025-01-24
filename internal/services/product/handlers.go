@@ -7,6 +7,7 @@ import (
 	"github.com/Ayeye11/inv/pkg/myhttp"
 )
 
+// post
 func (h *Handler) postProducts(w http.ResponseWriter, r *http.Request) {
 	payload, err := h.store.ParseAddProductPayload(r)
 	if err != nil {
@@ -47,6 +48,7 @@ func (h *Handler) postProducts(w http.ResponseWriter, r *http.Request) {
 	myhttp.SendMessage(w, http.StatusCreated, "product created successfully")
 }
 
+// get
 func (h *Handler) getProductsPage(w http.ResponseWriter, r *http.Request) {
 	if !r.URL.Query().Has("page") {
 		http.Redirect(w, r, "/products?page=1", http.StatusFound)
@@ -84,4 +86,123 @@ func (h *Handler) getProductById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	myhttp.SendJSON(w, http.StatusOK, product)
+}
+
+// update
+func (h *Handler) putProductById(w http.ResponseWriter, r *http.Request) {
+	id, err := h.globalStore.Atoi(r.PathValue("id"))
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	payload, err := h.store.ParseUpdateProductPayload(r)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	if err := h.store.ValidatePutUpdate(payload); err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	prod, err := h.store.GetProductById(id)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	claim, err := h.globalStore.GetSingleClaimFromContext(r, "sub")
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	userID, err := h.globalStore.Atoi(claim)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	err = h.store.UpdatePutProduct(prod.ID, &models.Product{
+		Name:        *payload.Name,
+		Description: payload.Description,
+		Price:       *payload.Price,
+		Stock:       *payload.Stock,
+		UpdateBy:    userID,
+	})
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	myhttp.SendMessage(w, http.StatusOK, "product updated successfully")
+}
+
+func (h *Handler) patchProductById(w http.ResponseWriter, r *http.Request) {
+	id, err := h.globalStore.Atoi(r.PathValue("id"))
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	payload, err := h.store.ParseUpdateProductPayload(r)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	updates, err := h.store.ValidatePatchUpdate(payload)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	prod, err := h.store.GetProductById(id)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	claim, err := h.globalStore.GetSingleClaimFromContext(r, "sub")
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	userID, err := h.globalStore.Atoi(claim)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	if err := h.store.UpdatePatchProduct(prod.ID, updates, userID); err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	myhttp.SendMessage(w, http.StatusOK, "product updated successfully")
+}
+
+// delete
+func (h *Handler) deleteProductById(w http.ResponseWriter, r *http.Request) {
+	id, err := h.globalStore.Atoi(r.PathValue("id"))
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	_, err = h.store.GetProductById(id)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	if err := h.store.DeleteProductById(id); err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	myhttp.SendMessage(w, http.StatusOK, "product deleted successfully")
 }

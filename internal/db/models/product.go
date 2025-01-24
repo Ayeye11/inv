@@ -12,6 +12,8 @@ type Product struct {
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdateAt    time.Time `gorm:"autoUpdateTime"`
 
+	//CategoryID int `gorm:"not null;index"`
+
 	CreatedBy int `gorm:"not null;index"`
 	UpdateBy  int `gorm:"not null;index"`
 }
@@ -22,4 +24,13 @@ type AddProductPayload struct {
 	Description *string  `json:"description"`
 	Price       *float64 `json:"price"`
 	Stock       *int     `json:"stock"`
+}
+
+type UpdateProductPayload struct {
+	Name        *string  `json:"name"`
+	Description *string  `json:"description"`
+	Price       *float64 `json:"price"`
+	Stock       *int     `json:"stock"`
+
+	//CategoryID int
 }

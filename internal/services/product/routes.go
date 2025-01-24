@@ -19,6 +19,11 @@ func NewHandler(globalStore store.GlobalRepository, store store.ProductRepositor
 func (h *Handler) SetRoutes(r *chi.Mux) {
 	r.With(h.middls.AuthEmployeeWithClaims).Post("/products", h.postProducts)
 
-	r.With(h.middls.AuthEmployee).Get("/products", h.getProductsPage)
+	r.With(h.middls.AuthEmployee).Get("/products", h.getProductsPage) // <-- /?page=x
 	r.With(h.middls.AuthEmployee).Get("/products/{id}", h.getProductById)
+
+	r.With(h.middls.AuthEmployeeWithClaims).Put("/products/{id}", h.putProductById)
+	r.With(h.middls.AuthEmployeeWithClaims).Patch("/products/{id}", h.patchProductById)
+
+	r.With(h.middls.AuthEmployee).Delete("/products/{id}", h.deleteProductById)
 }

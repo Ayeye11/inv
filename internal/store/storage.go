@@ -65,11 +65,19 @@ type UserRepository interface {
 type ProductRepository interface {
 	// parse
 	ParseAddProductPayload(r *http.Request) (*models.AddProductPayload, error)
+	ParseUpdateProductPayload(r *http.Request) (*models.UpdateProductPayload, error)
 	// validate
 	ValidateAddProductPayload(payload *models.AddProductPayload) error
+	ValidatePutUpdate(payload *models.UpdateProductPayload) error
+	ValidatePatchUpdate(payload *models.UpdateProductPayload) (map[string]any, error)
 	// create
 	AddProduct(product *models.Product) error
 	// read
 	GetProductsPage(page int) ([]models.Product, error)
 	GetProductById(id int) (*models.Product, error)
+	// update
+	UpdatePutProduct(id int, product *models.Product) error
+	UpdatePatchProduct(id int, values map[string]any, userID int) error
+	// delete
+	DeleteProductById(id int) error
 }

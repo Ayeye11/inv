@@ -11,6 +11,7 @@ import (
 func CreateJWT(user *models.User, secretKey string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub":  strconv.Itoa(user.ID),
+		"name": user.Name,
 		"role": user.Role,
 	}
 
