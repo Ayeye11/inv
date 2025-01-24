@@ -1,6 +1,7 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Ayeye11/inv/internal/db/models"
@@ -66,4 +67,17 @@ func (h *Handler) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	h.store.SendCookie(w, token)
 	myhttp.SendMessage(w, http.StatusOK, "login successful")
+}
+
+func (h *Handler) postLogout(w http.ResponseWriter, r *http.Request) {
+	username, err := h.globalStore.GetSingleClaimFromContext(r, "username")
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	bye := fmt.Sprintf("user %s logout successfully", username)
+
+	h.store.CleanCookie(w)
+	myhttp.SendMessage(w, http.StatusOK, bye)
 }

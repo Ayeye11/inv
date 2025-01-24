@@ -37,6 +37,10 @@ func (s *UserStore) ParseLoginPayload(r *http.Request) (*models.UserLoginPayload
 
 // validate
 func (s *UserStore) ValidateRegisterPayload(payload *models.UserRegisterPayload) error {
+	if payload == nil {
+		return myhttp.NewErrorHTTP(http.StatusBadRequest, "missing credentials")
+	}
+
 	if payload.Email == "" || payload.Name == "" || payload.Lastname == "" || payload.Password == "" {
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "missing credentials")
 	}
@@ -102,6 +106,7 @@ func (s *UserStore) CreateToken(user *models.User) (string, error) {
 	return token, nil
 }
 
+// cookie
 func (s *UserStore) SendCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",

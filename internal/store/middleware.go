@@ -1,8 +1,10 @@
 package store
 
 import (
+	"context"
 	"net/http"
 
+	"github.com/Ayeye11/inv/internal/db/models"
 	"github.com/Ayeye11/inv/internal/utils/auth"
 	"github.com/Ayeye11/inv/pkg/myhttp"
 	"github.com/golang-jwt/jwt/v5"
@@ -13,8 +15,9 @@ type MiddlewareStore struct {
 }
 
 var valideRoles = map[string]int{
-	"user":  1,
-	"admin": 2,
+	"user":     1,
+	"employee": 2,
+	"admin":    3,
 }
 
 // auth
@@ -63,3 +66,7 @@ func (s *MiddlewareStore) CheckRole(role, minRole string) error {
 }
 
 // context
+func (s *MiddlewareStore) SetClaimsToContext(r *http.Request, claims jwt.MapClaims) context.Context {
+	var ctxKey models.ContextKey = "claims"
+	return context.WithValue(r.Context(), ctxKey, claims)
+}
