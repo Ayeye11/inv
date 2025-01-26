@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -16,7 +17,7 @@ type GlobalStore struct {
 func (s *GlobalStore) Atoi(x string) (int, error) {
 	num, err := strconv.Atoi(x)
 	if err != nil {
-		return 0, myhttp.NewErrorHTTP(http.StatusInternalServerError, err.Error())
+		return 0, myhttp.NewErrorHTTP(http.StatusBadRequest, fmt.Sprintf("invalid input: '%s'", x))
 	}
 
 	return num, nil

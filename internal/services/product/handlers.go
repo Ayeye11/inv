@@ -1,6 +1,7 @@
 package product
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Ayeye11/inv/internal/db/models"
@@ -37,8 +38,9 @@ func (h *Handler) postProducts(w http.ResponseWriter, r *http.Request) {
 		Description: payload.Description,
 		Price:       *payload.Price,
 		Stock:       *payload.Stock,
+		Category:    payload.Category,
 		CreatedBy:   id,
-		UpdateBy:    id,
+		UpdatedBy:   id,
 	})
 	if err != nil {
 		myhttp.SendError(w, err)
@@ -88,6 +90,31 @@ func (h *Handler) getProductById(w http.ResponseWriter, r *http.Request) {
 	myhttp.SendJSON(w, http.StatusOK, product)
 }
 
+func (h *Handler) getProductsByCategory(w http.ResponseWriter, r *http.Request) {
+	category := r.PathValue("category")
+
+	if !r.URL.Query().Has("page") {
+		url := fmt.Sprintf("/products/%s?page=1", category)
+		http.Redirect(w, r, url, http.StatusFound)
+		return
+	}
+
+	query := r.URL.Query().Get("page")
+	page, err := h.globalStore.Atoi(query)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	prods, err := h.store.GetProductsByCategoryPage(page, category)
+	if err != nil {
+		myhttp.SendError(w, err)
+		return
+	}
+
+	myhttp.SendJSON(w, http.StatusOK, prods)
+}
+
 // update
 func (h *Handler) putProductById(w http.ResponseWriter, r *http.Request) {
 	id, err := h.globalStore.Atoi(r.PathValue("id"))
@@ -130,7 +157,8 @@ func (h *Handler) putProductById(w http.ResponseWriter, r *http.Request) {
 		Description: payload.Description,
 		Price:       *payload.Price,
 		Stock:       *payload.Stock,
-		UpdateBy:    userID,
+		Category:    *payload.Category,
+		UpdatedBy:   userID,
 	})
 	if err != nil {
 		myhttp.SendError(w, err)

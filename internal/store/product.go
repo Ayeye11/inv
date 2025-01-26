@@ -40,11 +40,11 @@ func (s *ProductStore) ValidateAddProductPayload(payload *models.AddProductPaylo
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "missing request")
 	}
 
-	if payload.Name == "" || payload.Price == nil || payload.Stock == nil {
+	if payload.Name == "" || payload.Category == "" || payload.Price == nil || payload.Stock == nil {
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "missing credentials")
 	}
 
-	if len(payload.Name) > 100 {
+	if len(payload.Name) > 100 || len(payload.Category) > 100 {
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid credentials")
 	}
 
@@ -60,7 +60,7 @@ func (s *ProductStore) ValidatePutUpdate(payload *models.UpdateProductPayload) e
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "missing request")
 	}
 
-	if payload.Name == nil || payload.Price == nil || payload.Stock == nil {
+	if payload.Name == nil || payload.Price == nil || payload.Stock == nil || payload.Category == nil {
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "missing credentials")
 	}
 
@@ -68,7 +68,7 @@ func (s *ProductStore) ValidatePutUpdate(payload *models.UpdateProductPayload) e
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid credentials")
 	}
 
-	if len(*payload.Name) > 100 {
+	if len(*payload.Name) > 100 || len(*payload.Category) > 100 {
 		return myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid credentials")
 	}
 
@@ -96,6 +96,14 @@ func (s *ProductStore) ValidatePatchUpdate(payload *models.UpdateProductPayload)
 		}
 
 		patch["description"] = payload.Description
+	}
+
+	if payload.Category != nil {
+		if len(*payload.Category) > 100 {
+			return nil, myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid credentials")
+		}
+
+		patch["category"] = payload.Category
 	}
 
 	if payload.Price != nil {
@@ -163,6 +171,28 @@ func (s *ProductStore) GetProductById(id int) (*models.Product, error) {
 	return &product, nil
 }
 
+func (s *ProductStore) GetProductsByCategoryPage(page int, category string) ([]models.Product, error) {
+	if page < 1 {
+		return nil, myhttp.NewErrorHTTP(http.StatusBadRequest, "invalid query")
+	}
+
+	limit := 10
+	offset := (page - 1) * limit
+
+	query := s.db.Where("category = ?", category).Limit(limit).Offset(offset)
+
+	var products []models.Product
+	if err := query.Find(&products).Error; err != nil {
+		return nil, myhttp.NewErrorHTTP(http.StatusInternalServerError, err.Error())
+	}
+
+	if page > 1 && len(products) == 0 {
+		return nil, myhttp.NewErrorHTTP(http.StatusNotFound, "no products found")
+	}
+
+	return products, nil
+}
+
 // update
 func (s *ProductStore) UpdatePutProduct(id int, product *models.Product) error {
 	if err := s.db.First(models.Product{}, id).Save(&product).Error; err != nil {
@@ -178,7 +208,7 @@ func (s *ProductStore) UpdatePutProduct(id int, product *models.Product) error {
 }
 
 func (s *ProductStore) UpdatePatchProduct(id int, values map[string]any, userID int) error {
-	values["update_by"] = userID
+	values["updated_by"] = userID
 
 	if err := s.db.Model(&models.Product{}).Where("id = ?", id).Updates(values).Error; err != nil {
 		return myhttp.NewErrorHTTP(http.StatusInternalServerError, err.Error())

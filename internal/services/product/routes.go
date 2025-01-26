@@ -16,14 +16,16 @@ func NewHandler(globalStore store.GlobalRepository, store store.ProductRepositor
 	return &Handler{globalStore, store, middls}
 }
 
+// prefix "/products"
 func (h *Handler) SetRoutes(r *chi.Mux) {
-	r.With(h.middls.AuthEmployeeWithClaims).Post("/products", h.postProducts)
+	r.With(h.middls.AuthEmployeeWithClaims).Post("/", h.postProducts)
 
-	r.With(h.middls.AuthEmployee).Get("/products", h.getProductsPage) // <-- /?page=x
-	r.With(h.middls.AuthEmployee).Get("/products/{id}", h.getProductById)
+	r.With(h.middls.Auth).Get("/", h.getProductsPage) // <-- /?page=x
+	r.With(h.middls.Auth).Get("/{id}", h.getProductById)
+	r.With(h.middls.Auth).Get("/{category}", h.getProductsByCategory)
 
-	r.With(h.middls.AuthEmployeeWithClaims).Put("/products/{id}", h.putProductById)
-	r.With(h.middls.AuthEmployeeWithClaims).Patch("/products/{id}", h.patchProductById)
+	r.With(h.middls.AuthEmployeeWithClaims).Put("/{id}", h.putProductById)
+	r.With(h.middls.AuthEmployeeWithClaims).Patch("/{id}", h.patchProductById)
 
-	r.With(h.middls.AuthEmployee).Delete("/products/{id}", h.deleteProductById)
+	r.With(h.middls.AuthEmployee).Delete("/{id}", h.deleteProductById)
 }

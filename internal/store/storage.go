@@ -46,9 +46,12 @@ type UserRepository interface {
 	// parse
 	ParseRegisterPayload(r *http.Request) (*models.UserRegisterPayload, error)
 	ParseLoginPayload(r *http.Request) (*models.UserLoginPayload, error)
+	ParseUserUpdatePayload(r *http.Request) (*models.UserUpdatePayload, error)
 	// validate
 	ValidateRegisterPayload(payload *models.UserRegisterPayload) error
 	ValidateLoginPayload(payload *models.UserLoginPayload) error
+	ValidatePatchUser(payload *models.UserUpdatePayload) (map[string]any, error)
+	CheckRole(role string) error
 	// auth
 	HashUserPassword(password string) (string, error)
 	TryLogin(email, password string) (*models.User, error)
@@ -60,6 +63,17 @@ type UserRepository interface {
 	CreateUser(user *models.User) error
 	// read
 	GetUserByEmail(email string) (*models.User, error)
+	GetUserById(id int) (*models.User, error)
+	// update
+	PatchUser(id int, updates map[string]any) error
+
+	// --- ADMIN
+	// parse
+	ParseUpdateRole(r *http.Request) (*models.UserRolePayload, error)
+	// read
+	GetUsersByRolePage(role string, page int) ([]models.ShowProfile, error)
+	// update
+	PatchRoleUser(id int, role string) error
 }
 
 type ProductRepository interface {
@@ -75,6 +89,7 @@ type ProductRepository interface {
 	// read
 	GetProductsPage(page int) ([]models.Product, error)
 	GetProductById(id int) (*models.Product, error)
+	GetProductsByCategoryPage(page int, category string) ([]models.Product, error)
 	// update
 	UpdatePutProduct(id int, product *models.Product) error
 	UpdatePatchProduct(id int, values map[string]any, userID int) error

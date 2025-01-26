@@ -17,8 +17,17 @@ func NewRouter(mux *chi.Mux, storage store.Storage) *Router {
 	return &Router{mux, storage}
 }
 
+func (r *Router) createSubRouter(path string) *chi.Mux {
+	sub := chi.NewRouter()
+	r.mux.Mount(path, sub)
+	return sub
+}
+
 func (r *Router) Setup() {
 	middls := middlewares.SetMiddlewares(r.storage.Middleware)
+
+	// sub routers
+	products := r.createSubRouter("/products")
 
 	// handlers
 	authHandler := user.NewHandler(r.storage.Global, r.storage.User, middls)
@@ -26,5 +35,5 @@ func (r *Router) Setup() {
 
 	// routes
 	authHandler.SetupRoutes(r.mux)
-	productHandler.SetRoutes(r.mux)
+	productHandler.SetRoutes(products)
 }

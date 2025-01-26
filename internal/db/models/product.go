@@ -9,13 +9,12 @@ type Product struct {
 	Description *string   `gorm:"type:text"`
 	Price       float64   `gorm:"type:decimal(10,2);not null"`
 	Stock       int       `gorm:"not null;default:0"`
+	Category    string    `gorm:"size:255;not null"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
-	UpdateAt    time.Time `gorm:"autoUpdateTime"`
-
-	//CategoryID int `gorm:"not null;index"`
+	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 
 	CreatedBy int `gorm:"not null;index"`
-	UpdateBy  int `gorm:"not null;index"`
+	UpdatedBy int `gorm:"not null;index"`
 }
 
 // payloads
@@ -24,6 +23,7 @@ type AddProductPayload struct {
 	Description *string  `json:"description"`
 	Price       *float64 `json:"price"`
 	Stock       *int     `json:"stock"`
+	Category    string   `json:"category"`
 }
 
 type UpdateProductPayload struct {
@@ -31,6 +31,5 @@ type UpdateProductPayload struct {
 	Description *string  `json:"description"`
 	Price       *float64 `json:"price"`
 	Stock       *int     `json:"stock"`
-
-	//CategoryID int
+	Category    *string  `json:"category"`
 }
