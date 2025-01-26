@@ -14,6 +14,7 @@ type Storage struct {
 	Middleware MiddlewareRepository
 	User       UserRepository
 	Product    ProductRepository
+	Inventory  InventoryRepository
 }
 
 func NewStorage(db *gorm.DB, jwtKey string) Storage {
@@ -22,6 +23,7 @@ func NewStorage(db *gorm.DB, jwtKey string) Storage {
 		Middleware: &MiddlewareStore{jwtKey},
 		User:       &UserStore{db, jwtKey},
 		Product:    &ProductStore{db},
+		Inventory:  &InventoryStore{db},
 	}
 }
 
@@ -95,4 +97,9 @@ type ProductRepository interface {
 	UpdatePatchProduct(id int, values map[string]any, userID int) error
 	// delete
 	DeleteProductById(id int) error
+}
+
+type InventoryRepository interface {
+	// read
+	InventoryValue() (*models.Inventory, error)
 }

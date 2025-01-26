@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/Ayeye11/inv/internal/middlewares"
+	"github.com/Ayeye11/inv/internal/services/inventory"
 	"github.com/Ayeye11/inv/internal/services/product"
 	"github.com/Ayeye11/inv/internal/services/user"
 	"github.com/Ayeye11/inv/internal/store"
@@ -32,8 +33,10 @@ func (r *Router) Setup() {
 	// handlers
 	authHandler := user.NewHandler(r.storage.Global, r.storage.User, middls)
 	productHandler := product.NewHandler(r.storage.Global, r.storage.Product, middls)
+	inventoryHandler := inventory.NewHandler(r.storage.Global, r.storage.Inventory, middls)
 
 	// routes
 	authHandler.SetupRoutes(r.mux)
 	productHandler.SetRoutes(products)
+	inventoryHandler.SetRoutes(r.mux)
 }
